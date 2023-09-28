@@ -1,0 +1,61 @@
+name: turku-v2-keha
+
+recipe: lamp
+
+config:
+  webroot: .
+
+services:
+  # @see elasticsearch/Dockerfile
+  elasticsearch:
+    type: compose
+    services:
+      image: "docker.elastic.co/elasticsearch/elasticsearch:7.16.3"
+      # command: "/bin/tini -- /usr/local/bin/docker-entrypoint.sh eswrapper"
+      user: elasticsearch
+      environment:
+        discovery.type: "single-node"
+        xpack.security.enabled: "true"
+        xpack.security.authc.api_key.enabled: "true"
+        ES_JAVA_OPTS: "-Xms1024m -Xmx1024m"
+        ELASTIC_PASSWORD: "epassu12345"
+        bootstrap.memory_lock: "true"
+      ulimits:
+        memlock:
+          soft: "-1"
+          hard: "-1"
+      ports:
+        - "9200:9200"
+      volumes:
+        - esdata:/usr/share/elasticsearch/data
+        - workdir:/usr/share/elasticsearch
+    # Install ES plugins.
+    # build_as_root:
+    #  - elasticsearch-plugin install analysis-icu
+    volumes:
+      esdata:
+        driver: local
+  node:
+    type: "node:16"
+    build:
+      - npm install
+
+tooling:
+  build_search_ui:
+    description: Build theme assets once.
+    service: node
+    dir: /search_ui
+    cmd:
+      - yarn install
+      - yarn build
+      - cat build/static/js/2.*.js \
+        build/static/js/main.*.js \
+        build/static/js/runtime*.js \
+        > full-bundle.js
+  # https://github.com/wunderio/client-fi-turku-v2-keha/blob/develop/docs/haku-ui_dokumentaatio.md#react-sovelluksen-k%C3%A4%C3%A4nn%C3%B6s
+
+env_file:
+  # Create secrets file manually. Values in LastPass.
+  - .lando/.env_secrets
+
+
