@@ -527,4 +527,4 @@ FodyWeavers.xsd
 *.sln.iml
 
 # Application main Config file
-config.yaml
+#config.yaml

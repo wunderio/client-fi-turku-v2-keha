@@ -9,7 +9,7 @@ COPY ./search_backend/requirements.txt .
 
 # copy the content of the local src directory to the working directory
 COPY ./search_backend/ .
-COPY ./config-backend.yaml ../config.yaml
+#COPY ./config-backend.yaml ../config.yaml
 
 # Install packages
 RUN apt-get clean \
